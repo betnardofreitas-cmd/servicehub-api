@@ -1,0 +1,25 @@
+# Endpoint alternativo (Aula 9 - Opção A: GraphQL)
+# POST /graphql  (exige "Authorization: Bearer <token>")
+# Playground: GET /graphiql
+
+type Query {
+    clients: [Client!]!
+    clientById(id: ID!): Client
+}
+
+type Mutation {
+    createClient(input: ClientInput!): Client!
+}
+
+type Client {
+    id: ID!
+    name: String!
+    email: String!
+    phone: String!
+}
+
+input ClientInput {
+    name: String!
+    email: String!
+    phone: String!
+}
