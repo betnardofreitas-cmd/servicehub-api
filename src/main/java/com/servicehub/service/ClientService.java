@@ -6,6 +6,7 @@ import com.servicehub.exception.EmailAlreadyExistsException;
 import com.servicehub.exception.ResourceNotFoundException;
 import com.servicehub.model.Client;
 import com.servicehub.repository.ClientRepository;
+import com.servicehub.util.InputSanitizer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,21 +16,22 @@ import java.util.List;
 public class ClientService {
 
     private final ClientRepository repository;
+    private final InputSanitizer sanitizer;
 
-    public ClientService(ClientRepository repository) {
+    public ClientService(ClientRepository repository, InputSanitizer sanitizer) {
         this.repository = repository;
+        this.sanitizer = sanitizer;
     }
 
     @Transactional
     public ClientResponse create(ClientRequest request) {
-        if (repository.existsByEmail(request.getEmail())) {
+        String email = sanitizer.email(request.getEmail());
+        if (repository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException("Já existe um cliente cadastrado com este e-mail.");
         }
 
         Client client = new Client();
-        client.setName(request.getName());
-        client.setEmail(request.getEmail());
-        client.setPhone(request.getPhone());
+        applySanitized(client, request);
 
         return toResponse(repository.save(client));
     }
@@ -48,13 +50,11 @@ public class ClientService {
     public ClientResponse update(Long id, ClientRequest request) {
         Client client = findEntity(id);
 
-        if (repository.existsByEmailAndIdNot(request.getEmail(), id)) {
+        if (repository.existsByEmailAndIdNot(sanitizer.email(request.getEmail()), id)) {
             throw new EmailAlreadyExistsException("Já existe outro cliente cadastrado com este e-mail.");
         }
 
-        client.setName(request.getName());
-        client.setEmail(request.getEmail());
-        client.setPhone(request.getPhone());
+        applySanitized(client, request);
 
         return toResponse(repository.save(client));
     }
@@ -63,6 +63,13 @@ public class ClientService {
     public void delete(Long id) {
         Client client = findEntity(id);
         repository.delete(client);
+    }
+
+    /** Sanitização na camada de service (Aula 8): trim, escape de HTML, e-mail em minúsculas. */
+    private void applySanitized(Client client, ClientRequest request) {
+        client.setName(sanitizer.text(request.getName()));
+        client.setEmail(sanitizer.email(request.getEmail()));
+        client.setPhone(sanitizer.phone(request.getPhone()));
     }
 
     private Client findEntity(Long id) {

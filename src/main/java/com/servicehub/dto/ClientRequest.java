@@ -3,6 +3,7 @@ package com.servicehub.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Dados necessários para criar ou atualizar um cliente")
@@ -21,8 +22,17 @@ public class ClientRequest {
 
     @NotBlank(message = "O telefone é obrigatório")
     @Size(max = 20, message = "O telefone deve ter no máximo 20 caracteres")
+    @Pattern(regexp = "^[0-9()+\\- ]{8,20}$", message = "Telefone deve conter apenas números, espaços, parênteses, + ou -")
     @Schema(description = "Telefone para contato", example = "(62) 99999-9999", requiredMode = Schema.RequiredMode.REQUIRED)
     private String phone;
+
+    public ClientRequest() {}
+
+    public ClientRequest(String name, String email, String phone) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

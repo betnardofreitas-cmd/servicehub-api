@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/clients")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Clientes", description = "Operações de cadastro e gerenciamento de clientes do ServiceHub")
 public class ClientController {
 
@@ -28,6 +31,7 @@ public class ClientController {
         this.service = service;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @Operation(
             summary = "Cadastrar cliente",
@@ -37,6 +41,8 @@ public class ClientController {
             @ApiResponse(responseCode = "201", description = "Cliente criado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos",
                     content = @Content(schema = @Schema(implementation = Object.class))),
+            @ApiResponse(responseCode = "401", description = "Sem token ou token inválido"),
+            @ApiResponse(responseCode = "403", description = "Papel sem permissão (somente ADMIN)"),
             @ApiResponse(responseCode = "409", description = "E-mail já cadastrado")
     })
     public ResponseEntity<ClientResponse> create(
@@ -57,6 +63,7 @@ public class ClientController {
         return ResponseEntity.created(URI.create("/api/clients/" + response.id())).body(response);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','PROVIDER')")
     @GetMapping
     @Operation(
             summary = "Listar clientes",
@@ -67,6 +74,7 @@ public class ClientController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','PROVIDER','CLIENT')")
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar cliente por ID",
@@ -81,6 +89,7 @@ public class ClientController {
         return ResponseEntity.ok(service.findById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @Operation(
             summary = "Atualizar cliente",
@@ -98,6 +107,7 @@ public class ClientController {
         return ResponseEntity.ok(service.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Excluir cliente",

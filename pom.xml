@@ -15,7 +15,7 @@
     <artifactId>servicehub-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ServiceHub API</name>
-    <description>Checkpoint - API REST de gerenciamento de clientes do ServiceHub</description>
+    <description>ServiceHub API - fase 2: seguranca, JWT, GraphQL e testes</description>
 
     <properties>
         <java.version>21</java.version>
@@ -34,6 +34,15 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
